@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Materials — LearnAI</title><link rel="stylesheet" href="css/style.css"></head>
+<body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script>
+<header class="site-header" data-site-header></header>
+<main class="dashboard-main">
+  <div class="dash-head"><div><span class="section-kicker">MY LEARNING MATERIALS</span>
+    <h1>Bring your own learning content.</h1>
+    <p>Upload material and turn it into an intelligent assessment experience.</p></div></div>
+
+  <div class="upload-card">
+    <div class="upload-symbol">↑</div><h2>Drop your material here</h2>
+    <p>PDF, DOCX, TXT or PPTX · up to 50 MB</p>
+    <label class="btn primary">Browse files
+      <input id="materialInput" type="file" hidden accept=".pdf,.docx,.txt,.pptx">
+    </label>
+    <div id="uploadState"></div>
+  </div>
+
+  <div class="section-head inline" style="margin-top:40px"><div>
+    <span class="section-kicker">RECENT MATERIALS</span><h2>Your content library</h2>
+  </div></div>
+  <div class="material-list" id="materialList"></div>
+</main>
+<script src="js/app.js"></script>
+<script>
+const input=document.getElementById("materialInput"), state=document.getElementById("uploadState"), list=document.getElementById("materialList");
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+function renderMaterials(){
+  const items=LearnAI.getUploadedMaterials();
+  const demo=LearnAI.getDB().materials||[];
+  const merged=[...items,...demo.filter(d=>!items.some(x=>x.name===d.name))];
+  list.innerHTML=merged.map((m,i)=>{
+    const type=(m.type||"DOC").toUpperCase();
+    const cls=type==="PDF"?"pdf":"doc";
+    const source=items.find(x=>x.name===m.name);
+    return `<div>
+      <span class="file-icon ${cls}">${esc(type)}</span>
+      <div><b>${esc(m.name)}</b><small>${esc(type)} · ${esc(m.date||"Uploaded")}</small></div>
+      <em class="ready">${source?"Ready for assessment":"Demo material"}</em>
+      <a href="generate.html?material=${encodeURIComponent(source?source.id:m.id||"")}">Generate quiz →</a>
+    </div>`;
+  }).join("") || `<div><div><b>No materials yet</b><small>Upload your first learning material.</small></div></div>`;
+}
+input.addEventListener("change",async e=>{
+  const file=e.target.files[0]; if(!file)return;
+  state.innerHTML=`<div class="upload-processing">⏳ Reading ${esc(file.name)}…</div>`;
+  try{
+    const item=await LearnAI.addUploadedMaterial(file,msg=>state.innerHTML=`<div class="upload-processing">✓ ${esc(file.name)} · ${msg}</div>`);
+    state.innerHTML=`<div class="upload-processing">✓ ${esc(item.name)} uploaded · Ready for assessment</div>`;
+    renderMaterials();
+    showToast("Material uploaded successfully.");
+  }catch(err){state.innerHTML=`<div class="upload-processing" style="color:#c0392b">✕ ${esc(err.message)}</div>`;}
+  input.value="";
+});
+renderMaterials();
+</script>
+<footer class="site-footer" data-site-footer></footer>
+</body></html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assessment — LearnAI</title><link rel="stylesheet" href="css/style.css"></head>
+<body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script><header class="site-header" data-site-header></header>
+<main class="quiz-page"><div class="quiz-top"><a href="generate.html">← Back to Assessment Studio</a><span id="quizMeta">Dynamic Assessment</span></div>
+<section class="quiz-layout"><div class="quiz-main"><div class="quiz-progress"><div><span id="questionNumber"></span><b id="scoreLive">0 answered</b></div><div class="progress-track"><i id="progressBar"></i></div></div>
+<div class="quiz-card"><div class="question-tag">DYNAMICALLY GENERATED FROM YOUR MATERIAL</div><h1 id="question"></h1><div id="options"></div>
+<div class="quiz-actions"><button id="prevBtn" class="btn light">← Previous</button><button id="nextBtn" class="btn primary">Next →</button></div></div></div>
+<aside class="quiz-side"><div class="quiz-side-card"><span class="mini-kicker">ASSESSMENT</span><h3 id="assessmentName">LearnAI Assessment</h3><p id="sourceInfo">Questions are grounded in the uploaded material.</p></div>
+<div class="quiz-side-card"><span class="mini-kicker">YOUR ANSWERS</span><div id="dots"></div></div>
+<div class="quiz-side-card tip"><span>✦</span><div><b>Assessment tip</b><p>Answer every question, then submit the assessment to see your score.</p></div></div></aside></section></main>
+<footer class="site-footer" data-site-footer></footer><script src="js/app.js"></script>
+<script>
+const settings=JSON.parse(sessionStorage.getItem("learnai_quiz_settings")||"null");
+if(!settings||!settings.questions?.length){alert("No generated quiz found. Please upload material and generate a quiz.");location.href="generate.html";}
+const questions=settings.questions||[], answers=Array(questions.length).fill(null); let current=0;
+document.getElementById("assessmentName").textContent=settings.assessmentName||"LearnAI Assessment";
+document.getElementById("sourceInfo").textContent=`${settings.file||"Learning material"} · ${settings.difficulty||"Intermediate"} · ${questions.length} MCQs`;
+document.getElementById("quizMeta").textContent=`${settings.difficulty||"Intermediate"} · ${questions.length} questions`;
+const dots=document.getElementById("dots");
+questions.forEach((_,i)=>{const d=document.createElement("button");d.className="q-dot";d.textContent=i+1;d.onclick=()=>{current=i;render()};dots.appendChild(d);});
+function render(){
+ const item=questions[current];
+ document.getElementById("questionNumber").textContent=`Question ${current+1} of ${questions.length}`;
+ document.getElementById("scoreLive").textContent=`${answers.filter(x=>x!==null).length} answered`;
+ document.getElementById("progressBar").style.width=`${((current+1)/questions.length)*100}%`;
+ document.getElementById("question").textContent=item.q;
+ const box=document.getElementById("options");box.innerHTML="";
+ item.a.forEach((text,i)=>{const b=document.createElement("button");b.className="quiz-option"+(answers[current]===i?" selected":"");b.innerHTML=`<span>${String.fromCharCode(65+i)}</span><b>${text}</b>`;b.onclick=()=>{answers[current]=i;render()};box.appendChild(b);});
+ document.getElementById("prevBtn").disabled=current===0;
+ document.getElementById("nextBtn").textContent=current===questions.length-1?"Submit Quiz →":"Next →";
+ document.querySelectorAll(".q-dot").forEach((d,i)=>d.classList.toggle("done",answers[i]!==null));
+}
+document.getElementById("prevBtn").onclick=()=>{if(current>0){current--;render()}};
+document.getElementById("nextBtn").onclick=()=>{
+ if(answers[current]===null){alert("Please select an answer.");return;}
+ if(current<questions.length-1){current++;render();return;}
+ const correct=answers.reduce((s,a,i)=>s+(a===questions[i].c?1:0),0);
+ const result={score:correct, total:questions.length, percentage:Math.round(correct/questions.length*100),file:settings.file,assessmentName:settings.assessmentName||"LearnAI Assessment",difficulty:settings.difficulty||"Intermediate",generationMode:settings.generationMode||"Local fallback",requirements:settings.requirements||"",questions,answers};
+ sessionStorage.setItem("learnai_last_result",JSON.stringify(result));
+ sessionStorage.setItem("learnai_last_score",result.percentage); sessionStorage.setItem("learnai_last_file",result.file); sessionStorage.setItem("learnai_last_count",result.total);
+ // Keep a persistent assessment history so Competency Intelligence can learn from every quiz.
+ try {
+   const key="learnai_assessment_history_v1";
+   const history=JSON.parse(localStorage.getItem(key)||"[]");
+   const topicStats={};
+   questions.forEach((q,i)=>{
+     const topic=q.source||"General";
+     if(!topicStats[topic]) topicStats[topic]={correct:0,total:0};
+     topicStats[topic].total++;
+     if(answers[i]===q.c) topicStats[topic].correct++;
+   });
+   Object.keys(topicStats).forEach(k=>topicStats[k].percentage=Math.round(topicStats[k].correct/topicStats[k].total*100));
+   const topicStatsArray=Object.entries(topicStats).map(([topic,v])=>({topic,correct:v.correct,total:v.total,percentage:v.percentage}));
+   history.unshift({id:Date.now(),date:new Date().toISOString(),file:settings.file||"Learning material",assessmentName:settings.assessmentName||"LearnAI Assessment",score:correct,total:questions.length,percentage:result.percentage,difficulty:settings.difficulty||"Intermediate",generationMode:settings.generationMode||"Local fallback",topics:topicStats,topicStats:topicStatsArray,questions,answers});
+   localStorage.setItem(key,JSON.stringify(history.slice(0,20)));
+ } catch(e) { console.warn("Could not save assessment history",e); }
+ location.href="results.html";
+};
+render();
+</script></body></html>

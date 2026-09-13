@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — LearnAI</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script>
+<header class="site-header" data-site-header></header>
+
+<main class="dashboard-main dashboard-final">
+
+  <!-- Evaluation-ready brand / introduction hero -->
+  <section class="dashboard-hero">
+    <div class="dashboard-hero-copy">
+      <div class="section-kicker">LEARN • ASSESS • IMPROVE</div>
+      <h1>LearnAI</h1>
+      <p class="hero-company-line">
+        <strong>AI-powered competency intelligence</strong> for continuous learning,
+        role readiness and better public-service capability.
+      </p>
+
+      <div class="hero-proof">
+        <span><b>76%</b> readiness</span>
+        <span><b>12</b> assessments</span>
+        <span><b>5</b> strong competencies</span>
+      </div>
+
+      <div class="hero-actions">
+        <a class="btn primary" href="competency.html">View My Competency Map →</a>
+        <a class="btn light" href="recommendations.html">Open Learning Path</a>
+      </div>
+
+      <div class="follow-row">
+        <span class="follow-label">Follow / Connect</span>
+        <button class="social-btn" data-demo-toast="LearnAI LinkedIn demo link — connect your official project profile here." aria-label="LinkedIn">in</button>
+        <button class="social-btn" data-demo-toast="LearnAI GitHub demo link — connect your project repository here." aria-label="GitHub">GH</button>
+        <button class="social-btn" data-demo-toast="LearnAI YouTube demo link — connect your project demo channel here." aria-label="YouTube">▶</button>
+        <button class="social-btn" data-demo-toast="LearnAI Instagram demo link — connect your official project profile here." aria-label="Instagram">◎</button>
+      </div>
+
+      <div class="hero-note">
+        <span class="live-dot"></span>
+        <span><b>Evaluation mode:</b> your progress, assessments and learning activity are powered by the LearnAI demo data layer.</span>
+      </div>
+    </div>
+
+    <div class="dashboard-hero-visual">
+      <div class="photo-card photo-main">
+        <img
+          src="https://cbc.gov.in/sites/default/files/2026-01/AI2_0.jpg"
+          alt="AI for Capacity Building workshop in India"
+          loading="eager">
+        <div class="photo-caption">
+          <span>AI FOR CAPACITY BUILDING</span>
+          <b>Technology + Human Intelligence</b>
+        </div>
+      </div>
+
+      <div class="photo-card photo-small">
+        <img
+          src="https://thiran360.tn.gov.in/assets/dep-cover-2-C4sWNZdn.jpg"
+          alt="Government officials in an AI training environment"
+          loading="lazy">
+        <div class="photo-caption">
+          <span>ROLE READINESS</span>
+          <b>Learning for better governance</b>
+        </div>
+      </div>
+
+      <div class="visual-badge">
+        <span class="badge-icon">✦</span>
+        <div>
+          <small>LEARN AI ENGINE</small>
+          <b>Gap → Recommendation</b>
+          <span>Evidence-based learning</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick metrics -->
+  <section class="dashboard-section">
+    <div class="dash-head">
+      <div>
+        <span class="section-kicker">YOUR LEARNING OVERVIEW</span>
+        <h2 id="dashboardGreeting">Good morning, Learner.</h2>
+        <p>Here is your current competency and learning snapshot.</p>
+      </div>
+      <a class="btn primary" href="generate.html">✦ Generate AI Assessment</a>
+    </div>
+
+    <div class="dash-grid stats4">
+      <div class="dash-stat interactive-stat" data-demo-toast="Readiness details opened.">
+        <span>Overall readiness</span><b>76%</b><i class="up">↑ 8% this month</i>
+      </div>
+      <div class="dash-stat interactive-stat" data-demo-toast="Assessment history opened.">
+        <span>Assessments completed</span><b>12</b><i>3 this week</i>
+      </div>
+      <div class="dash-stat interactive-stat" data-demo-toast="Competency map opened.">
+        <span>Strong competencies</span><b>5</b><i>out of 8 tracked</i>
+      </div>
+      <div class="dash-stat alert interactive-stat" data-demo-toast="Priority competency gaps opened.">
+        <span>Needs attention</span><b>3</b><i>priority gaps</i>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main dashboard intelligence -->
+  <section class="dashboard-section compact-top">
+    <div class="dash-grid two">
+      <section class="panel">
+        <div class="panel-head">
+          <div><span class="mini-kicker">PROGRESS</span><h2>Learning progress</h2></div>
+          <select id="progressRange" aria-label="Progress range">
+            <option>Last 30 days</option>
+            <option>Last 7 days</option>
+          </select>
+        </div>
+        <div class="fake-chart">
+          <div class="y-labels"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div>
+          <svg viewBox="0 0 700 250" preserveAspectRatio="none" aria-label="Learning progress chart">
+            <path d="M0 210 C70 190 95 180 150 195 S240 125 300 145 S390 95 450 110 S550 55 610 82 S665 35 700 48" fill="none" stroke="currentColor" stroke-width="4"/>
+            <path d="M0 210 C70 190 95 180 150 195 S240 125 300 145 S390 95 450 110 S550 55 610 82 S665 35 700 48 L700 250 L0 250Z" fill="currentColor" opacity=".08"/>
+          </svg>
+          <div class="x-labels"><span>01 Sep</span><span>08 Sep</span><span>15 Sep</span><span>22 Sep</span><span>30 Sep</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div><span class="mini-kicker">COMPETENCY INTELLIGENCE</span><h2>Competency pulse</h2></div>
+          <a href="competency.html">View all →</a>
+        </div>
+        <div class="skill-list">
+          <div><span>Digital Fluency</span><b>88%</b><em class="strong">Strong</em><div class="bar"><i style="width:88%"></i></div></div>
+          <div><span>Statistical Reasoning</span><b>72%</b><em class="moderate">Moderate</em><div class="bar"><i style="width:72%"></i></div></div>
+          <div><span>Data Analysis</span><b>54%</b><em class="weak">Needs attention</em><div class="bar"><i style="width:54%"></i></div></div>
+          <div><span>Data Visualization</span><b>61%</b><em class="moderate">Moderate</em><div class="bar"><i style="width:61%"></i></div></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="dash-grid two dashboard-lower-grid">
+      <section class="panel">
+        <div class="panel-head">
+          <div><span class="mini-kicker">AI RECOMMENDATIONS</span><h2>Recommended for you</h2></div>
+          <a href="recommendations.html">See learning path →</a>
+        </div>
+        <div class="rec-row"><span class="rec-icon red">◈</span><div><b>Strengthen Data Analysis</b><p>2 learning resources · 1 assessment</p></div><span class="priority">HIGH</span><button data-demo-toast="Opening the high-priority Data Analysis learning path.">→</button></div>
+        <div class="rec-row"><span class="rec-icon yellow">✦</span><div><b>Practice Statistical Reasoning</b><p>3 resources · estimated 2h 20m</p></div><span class="priority med">MEDIUM</span><button data-demo-toast="Opening Statistical Reasoning resources.">→</button></div>
+        <div class="rec-row"><span class="rec-icon green">✓</span><div><b>Maintain Digital Fluency</b><p>1 refresher · estimated 35m</p></div><span class="priority low">LOW</span><button data-demo-toast="Opening your Digital Fluency refresher.">→</button></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div><span class="mini-kicker">ACTIVITY</span><h2>Recent activity</h2></div>
+          <a href="analytics.html">View history →</a>
+        </div>
+        <div class="activity"><span class="activity-dot"></span><div><b>AI Assessment completed</b><p>Data Analysis Fundamentals · 54%</p></div><time>Today</time></div>
+        <div class="activity"><span class="activity-dot green-dot"></span><div><b>Competency improved</b><p>Digital Fluency · +6%</p></div><time>Yesterday</time></div>
+        <div class="activity"><span class="activity-dot"></span><div><b>Learning started</b><p>Statistical Reasoning for Officials</p></div><time>3 days ago</time></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- Strong evaluation CTA -->
+  <section class="dashboard-cta">
+    <div>
+      <span class="section-kicker">NEXT BEST ACTION</span>
+      <h2>Turn your competency gap into a learning plan.</h2>
+      <p>LearnAI connects assessment evidence with targeted learning recommendations — so users know not only <b>what to learn</b>, but <b>why it matters</b>.</p>
+    </div>
+    <div class="cta-actions">
+      <a class="btn primary" href="competency.html">Analyze Competency</a>
+      <a class="btn white" href="courses.html">Explore Learning Hub</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer" data-site-footer></footer>
+<script src="js/app.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>{const p=LearnAI.getProfile();const n=p.name||"Learner";const h=document.getElementById("dashboardGreeting");if(h)h.textContent=`Good morning, ${n.split(/\s+/)[0]}.`;});</script>
+</body>
+</html>

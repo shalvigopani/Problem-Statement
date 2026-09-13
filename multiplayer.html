@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Battle — LearnAI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/multiplayer.css">
+</head>
+<body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script>
+<header class="site-header" data-site-header></header>
+<main class="battle-main">
+  <section class="battle-hero">
+    <div><span class="section-kicker">COMPETE • LEARN • IMPROVE</span><h1>Quiz Battle</h1><p>Challenge classmates in a real-time multiplayer quiz. Same questions, same timer, live leaderboard.</p></div>
+    <div class="battle-status"><span class="live-dot"></span><span id="connectionText">Connecting…</span></div>
+  </section>
+
+  <section id="setupView" class="battle-grid">
+    <div class="battle-card">
+      <div class="card-title"><span class="battle-icon">⚔</span><div><h2>Create Room</h2><p>Host a new quiz battle.</p></div></div>
+      <form id="createForm" class="battle-form">
+        <label>Room Name<input id="roomName" required maxlength="60" placeholder="Friday Quiz Battle"></label>
+        <label>Quiz Topic<input id="topic" required maxlength="100" placeholder="JavaScript, DBMS, Science…"></label>
+        <div class="form-row"><label>Difficulty<select id="difficulty"><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option></select></label><label>Questions<select id="questionCount"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></label></div>
+        <label>Timer per question<select id="timer"><option value="15">15 seconds</option><option value="20">20 seconds</option><option selected value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></label>
+        <button class="btn primary wide" type="submit">Create Room →</button>
+      </form>
+    </div>
+    <div class="battle-card join-card">
+      <div class="card-title"><span class="battle-icon">➜</span><div><h2>Join Room</h2><p>Enter a friend's 6-digit room code.</p></div></div>
+      <form id="joinForm" class="battle-form">
+        <label>Your Name<input id="joinName" required maxlength="40" placeholder="Enter your name"></label>
+        <label>Room Code<input id="joinCode" required inputmode="numeric" maxlength="6" placeholder="123456"></label>
+        <button class="btn dark wide" type="submit">Join Room</button>
+      </form>
+      <div class="join-note"><b>How it works</b><span>1. Host creates a room</span><span>2. Share the code</span><span>3. Everyone joins</span><span>4. Host starts the battle</span></div>
+    </div>
+  </section>
+
+  <section id="lobbyView" class="battle-card hidden">
+    <div class="lobby-head"><div><span class="mini-kicker">WAITING LOBBY</span><h2 id="lobbyTitle">Quiz Battle</h2><p id="lobbyMeta"></p></div><div class="room-code-box"><small>ROOM CODE</small><strong id="roomCode">------</strong><button id="copyCode" class="copy-btn">Copy</button></div></div>
+    <div class="lobby-body"><div><h3>Players <span id="playerCount">0</span></h3><div id="playerList" class="player-list"></div></div><div class="host-panel"><div class="host-tip">✦ <b>Host controls</b><p>Generate the shared quiz, then start when everyone is ready.</p></div><button id="startBattle" class="btn primary wide">Generate & Start Battle</button><button id="leaveRoom" class="btn ghost wide">Leave Room</button><p id="lobbyMessage" class="form-message"></p></div></div>
+  </section>
+
+  <section id="quizView" class="battle-card hidden">
+    <div class="quiz-top"><div><span class="mini-kicker" id="quizTopicLabel">QUIZ BATTLE</span><h2 id="questionNumber">Question 1</h2></div><div class="timer-box"><span>TIME</span><strong id="timerValue">30</strong></div></div>
+    <div class="progress-track"><i id="questionProgress"></i></div>
+    <div class="question-area"><p id="questionText"></p><div id="options" class="options-grid"></div></div>
+    <div class="quiz-foot"><span id="answerState">Choose an answer</span><button id="nextQuestion" class="btn primary" disabled>Next →</button></div>
+    <div class="mini-leaderboard"><div class="mini-leader-head"><b>Live Leaderboard</b><span id="liveRank">Your Rank —</span></div><div id="liveLeaderboard"></div></div>
+  </section>
+
+  <section id="resultView" class="hidden">
+    <div class="result-hero battle-card"><span class="result-trophy">🏆</span><div><span class="section-kicker">BATTLE COMPLETE</span><h2 id="resultTitle">Great battle!</h2><p id="resultSummary"></p></div></div>
+    <div class="result-grid">
+      <div class="battle-card"><span class="mini-kicker">YOUR RESULT</span><div class="score-big" id="yourScore">0</div><div class="score-label">points</div><div id="resultStats" class="result-stats"></div></div>
+      <div class="battle-card"><span class="mini-kicker">LIVE LEADERBOARD</span><div id="finalLeaderboard" class="final-leaderboard"></div></div>
+    </div>
+    <div class="result-grid">
+      <div class="battle-card"><span class="mini-kicker">GROUP PERFORMANCE</span><h3>How the group performed</h3><div id="groupStats" class="group-stats"></div></div>
+      <div class="battle-card"><span class="mini-kicker">AI FEEDBACK</span><h3>Next best step</h3><p id="aiFeedback" class="feedback-box">Analyzing your performance…</p><button id="playAgain" class="btn primary">Play Again</button></div>
+    </div>
+  </section>
+  <p id="globalMessage" class="global-message"></p>
+</main>
+<footer class="site-footer" data-site-footer></footer>
+<script src="js/app.js"></script>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="js/multiplayer.js"></script>
+</body>
+</html>

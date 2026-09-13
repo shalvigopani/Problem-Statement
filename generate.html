@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Quiz Generator — LearnAI</title><link rel="stylesheet" href="css/style.css"></head>
+<body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script>
+<header class="site-header" data-site-header></header>
+<main class="quiz-studio">
+<section class="studio-hero"><div><span class="section-kicker">LEARN AI · ASSESSMENT STUDIO</span>
+<h1>Turn any learning document into a smart quiz.</h1>
+<p>Upload PDF, DOCX, TXT or PPTX. LearnAI reads the material in your browser and creates dynamic MCQs from the uploaded content.</p></div>
+<div class="studio-stepper"><div class="step active"><span>1</span><b>Upload</b><small>Add material</small></div><div class="step-line"></div><div class="step"><span>2</span><b>Configure</b><small>Set quiz</small></div><div class="step-line"></div><div class="step"><span>3</span><b>Generate</b><small>Dynamic MCQs</small></div><div class="step-line"></div><div class="step"><span>4</span><b>Assess</b><small>Submit</small></div></div></section>
+
+<section class="studio-grid"><div class="studio-left">
+<div class="studio-card upload-card"><div class="card-title-row"><div><span class="mini-kicker">STEP 01</span><h2>Upload learning material</h2></div><span class="secure-pill">● Local processing</span></div>
+<label class="dropzone" id="dropzone" for="fileInput"><input id="fileInput" type="file" accept=".pdf,.docx,.txt,.pptx">
+<div class="upload-icon">↑</div><h3>Drop your material here</h3><p>or <u>browse from your computer</u></p><div class="file-types"><span>PDF</span><span>DOCX</span><span>TXT</span><span>PPTX</span><em>Max 50 MB</em></div></label>
+<div class="file-selected" id="fileSelected" hidden><div class="file-icon">DOC</div><div><b id="fileName">Document</b><span id="fileMeta">Ready</span></div><button type="button" id="removeFile">×</button></div>
+<div class="material-preview" id="materialPreview" hidden><div class="preview-head"><span>MATERIAL TEXT EXTRACTED</span><span id="wordCount">0 words</span></div><p id="previewText"></p></div></div>
+
+<div class="studio-card config-card"><div class="card-title-row"><div><span class="mini-kicker">STEP 02</span><h2>Configure your assessment</h2></div></div>
+<div class="config-grid"><label>Assessment name<input id="assessmentName" type="text" placeholder="e.g. Unit 3 Practice Test"></label>
+<label>Questions<select id="questionCount"><option value="auto" selected>Auto — all quality questions</option><option value="5">5 questions</option><option value="10">10 questions</option><option value="15">15 questions</option><option value="20">20 questions</option></select></label>
+<label>Difficulty<select id="difficulty"><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option></select></label>
+<label>Focus<select id="focus"><option>Auto-detect from document</option><option>Key concepts</option><option>Definitions</option><option>Application</option></select></label>
+<label>Language<select id="language"><option selected>English</option><option>Hindi</option><option>Hinglish</option></select></label></div>
+<label style="display:block;margin-top:14px">Your requirements<textarea id="requirements" rows="4" placeholder="Example: Focus on calculation-based questions from Compound Interest. Avoid repeated examples. Make questions exam-oriented."></textarea></label>
+<div class="ai-status" id="aiStatus">✦ Gemini Flash will generate from your uploaded reference when the LearnAI server is running.</div></div>
+
+<button class="generate-main" id="generateBtn" type="button"><span>✦</span><div><b>Generate Dynamic Quiz</b><small>Questions will be created from this uploaded material — no answer leakage</small></div><strong>→</strong></button>
+<p class="grounding-note">No fixed MCQ bank is used. LearnAI removes answer/solution blocks before question creation, identifies the subject, and creates fresh assessment-style MCQs from the material. Auto mode keeps all reliable questions it can generate instead of adding weak filler.</p>
+</div>
+<aside class="studio-right"><div class="studio-card ai-card"><span class="mini-kicker">HOW LEARNAI WORKS</span><h2>From material to competency insight.</h2>
+<div class="ai-flow"><div><span>01</span><b>Upload</b><small>PDF · DOCX · TXT · PPTX</small></div><i>↓</i><div><span>02</span><b>Understand</b><small>Extract readable content</small></div><i>↓</i><div><span>03</span><b>Generate</b><small>Create dynamic MCQs</small></div><i>↓</i><div><span>04</span><b>Assess</b><small>Submit and score</small></div></div></div>
+<div class="studio-card ready-card"><span class="mini-kicker">ASSESSMENT QUALITY</span><div class="quality"><div class="quality-ring">AI</div><div><b>Material-grounded</b><p>Questions are based on the selected learning material.</p></div></div><div class="quality-row"><span>Dynamic single-answer MCQs</span><b>✓</b></div><div class="quality-row"><span>Submit + score</span><b>✓</b></div><div class="quality-row"><span>PDF / DOCX / TXT / PPTX</span><b>✓</b></div></div></aside></section></main>
+<footer class="site-footer" data-site-footer></footer>
+<script src="js/app.js"></script>
+<script>
+const input=document.getElementById("fileInput"), dropzone=document.getElementById("dropzone"), selected=document.getElementById("fileSelected"), preview=document.getElementById("materialPreview");
+const previewText=document.getElementById("previewText"), wordCount=document.getElementById("wordCount"), fileName=document.getElementById("fileName"), fileMeta=document.getElementById("fileMeta");
+let selectedFile=null, selectedText="", selectedMaterial=null;
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+async function showFile(file){
+ if(!file)return; selectedFile=file;
+ const ext=file.name.split(".").pop().toLowerCase();
+ fileName.textContent=file.name; fileMeta.textContent=`${ext.toUpperCase()} · ${(file.size/1024/1024).toFixed(2)} MB`;
+ selected.hidden=false; dropzone.classList.add("has-file"); preview.hidden=true;
+ try{
+   selectedText=await LearnAI.extractMaterialText(file);
+   selectedMaterial=null;
+   previewText.textContent=selectedText.slice(0,900);
+   wordCount.textContent=`${selectedText.trim().split(/\s+/).filter(Boolean).length} words`;
+   preview.hidden=false;
+ }catch(err){selectedText=""; alert(err.message);}
+}
+input.addEventListener("change",e=>showFile(e.target.files[0]));
+["dragenter","dragover"].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.add("dragging");}));
+["dragleave","drop"].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.remove("dragging");}));
+dropzone.addEventListener("drop",e=>showFile(e.dataTransfer.files[0]));
+document.getElementById("removeFile").onclick=()=>{selectedFile=null;selectedText="";selectedMaterial=null;input.value="";selected.hidden=true;preview.hidden=true;dropzone.classList.remove("has-file");};
+const params=new URLSearchParams(location.search), materialId=params.get("material");
+if(materialId){
+ const m=LearnAI.getUploadedMaterials().find(x=>x.id===materialId);
+ if(m){selectedMaterial=m;selectedText=m.text;fileName.textContent=m.name;fileMeta.textContent=`${m.type} · ${m.size} · Ready`;selected.hidden=false;previewText.textContent=m.text.slice(0,900);wordCount.textContent=`${m.text.split(/\s+/).length} words`;preview.hidden=false;}
+}
+const assessmentNameInput=document.getElementById("assessmentName");
+const requirementsInput=document.getElementById("requirements");
+const aiStatus=document.getElementById("aiStatus");
+const retryConfig=JSON.parse(sessionStorage.getItem("learnai_retry_config")||"null");
+if(retryConfig){
+  if(retryConfig.name) assessmentNameInput.value=retryConfig.name;
+  if(retryConfig.focus) document.getElementById("focus").value=retryConfig.focus;
+  if(retryConfig.requirements) requirementsInput.value=retryConfig.requirements;
+  sessionStorage.removeItem("learnai_retry_config");
+}
+(async()=>{try{const h=await fetch('/api/health');const d=await h.json();if(d.geminiConfigured){aiStatus.textContent=`✦ Gemini Flash connected · ${d.model} · uploaded material remains the reference`;aiStatus.classList.add('connected')}}catch(e){}})();
+document.getElementById("generateBtn").onclick=async()=>{
+ if(!selectedText){alert("Please upload a readable learning material first.");return;}
+ const btn=document.getElementById("generateBtn");
+ btn.disabled=true;btn.querySelector("b").textContent="Generating with Gemini Flash…";
+ try{
+   const settings={file:selectedFile?selectedFile.name:selectedMaterial.name,count:document.getElementById("questionCount").value,difficulty:document.getElementById("difficulty").value,focus:document.getElementById("focus").value,language:document.getElementById("language").value,assessmentName:assessmentNameInput.value.trim()||"LearnAI Assessment",requirements:requirementsInput.value.trim(),text:selectedText};
+   let qs;
+   try{
+     qs=await LearnAI.generateQuizWithGemini(settings);
+     settings.generationMode="Gemini Flash";
+   }catch(aiErr){
+     console.warn("Gemini unavailable; using local material-grounded fallback.",aiErr);
+     qs=LearnAI.generateDynamicQuestions(settings.text,settings.count,settings.difficulty,settings.focus);
+     settings.generationMode="Local fallback";
+   }
+   settings.questions=qs;
+   sessionStorage.setItem("learnai_quiz_settings",JSON.stringify(settings));
+   window.location.href="quiz.html?generated=1";
+ }catch(err){alert(err.message);}finally{btn.disabled=false;btn.querySelector("b").textContent="Generate Dynamic Quiz";}
+};
+</script></body></html>

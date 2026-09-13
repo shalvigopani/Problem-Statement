@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Progress — LearnAI</title><link rel="stylesheet" href="css/style.css"></head><body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script>
+  <header class="site-header" data-site-header></header><div id="appShell"></div><main class="dashboard-main">
+  <div class="dash-head">
+    <div><span class="section-kicker">MY PROGRESS</span><h1>See your learning performance.</h1><p>Track accuracy, score trends, and topic-wise improvement from your completed quizzes.</p></div>
+    <select class="period" id="analyticsPeriod"><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="all">All time</option></select>
+  </div>
+
+  <div class="dash-grid stats4 compact" id="analyticsStats"></div>
+
+  <div class="analytics-visual-grid">
+    <section class="panel analytics-visual-card">
+      <div class="panel-head"><div><h2>Accuracy breakdown</h2><p class="chart-subtitle">Correct vs incorrect answers</p></div></div>
+      <div class="donut-wrap" id="accuracyChart"></div>
+    </section>
+    <section class="panel analytics-visual-card">
+      <div class="panel-head"><div><h2>Score trend</h2><p class="chart-subtitle">Quiz percentage over time</p></div></div>
+      <div class="line-chart-wrap" id="scoreTrendChart"></div>
+    </section>
+  </div>
+
+  <section class="panel analytics-wide-card analytics-topic-panel">
+    <div class="panel-head"><div><h2>Topic performance</h2><p class="chart-subtitle">Accuracy across the topics covered by your quizzes</p></div></div>
+    <div id="topicAnalytics"></div>
+  </section>
+
+  <section class="panel analytics-history">
+    <div class="panel-head"><div><h2>Quiz history</h2><p class="history-subtitle">Every completed Learning Hub quiz appears here automatically.</p></div><span class="pill" id="assessmentCount">0 assessments</span></div>
+    <div id="analyticsHistory"></div>
+  </section>
+</main><script src="js/app.js"></script><script>renderShell('analytics');</script>
+<script>
+(function(){
+  const KEY='learnai_assessment_history_v1';
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
+  function filtered(){const all=load(),v=$('analyticsPeriod').value;if(v==='all')return all;const cutoff=Date.now()-Number(v)*86400000;return all.filter(a=>new Date(a.date).getTime()>=cutoff)}
+  function empty(){
+    $('analyticsStats').innerHTML='<div class="empty-panel" style="grid-column:1/-1">No completed quizzes for this period. Complete a Learning Hub quiz to build your analytics.</div>';
+    $('accuracyChart').innerHTML='<div class="empty-state">No quiz data yet.</div>';
+    $('scoreTrendChart').innerHTML='<div class="empty-state">No score trend yet.</div>';
+    $('topicAnalytics').innerHTML='<div class="empty-state">No topic data yet.</div>';
+    $('analyticsHistory').innerHTML='<div class="empty-panel">Your completed quizzes and marks will appear here.</div>';
+  }
+  function render(){
+    const data=filtered(); $('assessmentCount').textContent=data.length+' assessment'+(data.length===1?'':'s'); if(!data.length){empty();return;}
+    const avg=Math.round(data.reduce((s,a)=>s+(Number(a.percentage)||0),0)/data.length),best=Math.max(...data.map(a=>Number(a.percentage)||0));
+    const totalQ=data.reduce((s,a)=>s+(Number(a.total)||0),0),correct=data.reduce((s,a)=>s+(Number(a.score)||0),0),incorrect=Math.max(0,totalQ-correct);
+    const topics={}; data.forEach(a=>(a.topicStats||[]).forEach(t=>{const k=t.topic||'General';if(!topics[k])topics[k]={c:0,t:0};topics[k].c+=Number(t.correct)||0;topics[k].t+=Number(t.total)||0;}));
+    const topicArr=Object.entries(topics).map(([topic,x])=>({topic,pct:x.t?Math.round(x.c/x.t*100):0,c:x.c,t:x.t})).sort((a,b)=>b.pct-a.pct);
+    const strongest=topicArr[0]?.topic||'—',weakest=topicArr[topicArr.length-1]?.topic||'—';
+    $('analyticsStats').innerHTML=`<div class="dash-stat"><span>Average score</span><b>${avg}%</b><i>Across ${data.length} quiz${data.length===1?'':'zes'}</i></div><div class="dash-stat"><span>Best score</span><b>${best}%</b><i>Highest quiz result</i></div><div class="dash-stat"><span>Questions answered</span><b>${totalQ}</b><i>${correct} correct</i></div><div class="dash-stat"><span>Strongest topic</span><b class="stat-topic">${esc(strongest)}</b><i>Weakest: ${esc(weakest)}</i></div>`;
+    const acc=totalQ?Math.round(correct/totalQ*100):0;
+    $('accuracyChart').innerHTML=`<div class="donut" style="--pct:${acc}%"><div class="donut-hole"><strong>${acc}%</strong><span>accuracy</span></div></div><div class="donut-legend"><div><span class="legend-dot correct-dot"></span><b>Correct</b><strong>${correct}</strong></div><div><span class="legend-dot incorrect-dot"></span><b>Incorrect</b><strong>${incorrect}</strong></div></div>`;
+    const trend=data.slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-8), W=700,H=280,pad=42;
+    const pts=trend.map((a,i)=>{const x=trend.length===1?W/2:pad+i*(W-pad*2)/(trend.length-1);const y=H-pad-(Math.max(0,Math.min(100,Number(a.percentage)||0))/100)*(H-pad*2);return {x,y,pct:Number(a.percentage)||0,date:new Date(a.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})}});
+    const poly=pts.map(p=>`${p.x},${p.y}`).join(' ');
+    $('scoreTrendChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" class="score-line-svg" role="img" aria-label="Quiz score trend"><line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" class="chart-grid-line"/><line x1="${pad}" y1="${H/2}" x2="${W-pad}" y2="${H/2}" class="chart-grid-line"/><line x1="${pad}" y1="${pad}" x2="${W-pad}" y2="${pad}" class="chart-grid-line"/><text x="8" y="${H-pad+5}" class="chart-axis">0%</text><text x="4" y="${H/2+5}" class="chart-axis">50%</text><text x="4" y="${pad+5}" class="chart-axis">100%</text><polyline points="${poly}" class="chart-line" fill="none"/>${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="5" class="chart-point"><title>${p.date}: ${p.pct}%</title></circle><text x="${p.x}" y="${H-12}" text-anchor="middle" class="chart-label">${esc(p.date)}</text>`).join('')}</svg>`;
+    $('topicAnalytics').innerHTML=topicArr.slice(0,10).map(t=>`<div class="topic-row"><div><b>${esc(t.topic)}</b><span>${t.c}/${t.t} correct</span></div><div class="topic-bar"><i style="width:${t.pct}%"></i></div><strong>${t.pct}%</strong></div>`).join('');
+    $('analyticsHistory').innerHTML=data.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).map(a=>`<details class="analytics-record"><summary><div><strong>${esc(a.file||'Quiz')}</strong><small>${new Date(a.date).toLocaleString()}</small></div><div class="assessment-mark"><b>${Number(a.score)||0}/${Number(a.total)||0}</b><span>${Number(a.percentage)||0}%</span></div></summary><div class="analytics-record-body">${(a.topicStats||[]).map(t=>`<span class="history-chip">${esc(t.topic)}: ${Number(t.percentage)||0}%</span>`).join('')}</div></details>`).join('');
+  }
+  $('analyticsPeriod').addEventListener('change',render);render();window.addEventListener('storage',e=>{if(e.key===KEY)render()});
+})();
+</script>  <footer class="site-footer" data-site-footer></footer>
+</body></html>

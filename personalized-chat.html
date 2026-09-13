@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Study Chat — LearnAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .chat-page{max-width:1180px;margin:0 auto;padding:34px 22px 50px}.chat-hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:22px}.chat-hero h1{margin:0 0 8px}.chat-hero p{margin:0;color:#68707d}.chat-grid{display:grid;grid-template-columns:280px 1fr;gap:20px}.chat-side,.chat-box{background:#fff;border:1px solid #e8e9ed;border-radius:18px;box-shadow:0 8px 28px rgba(25,25,40,.06)}.chat-side{padding:20px;height:max-content}.ai-avatar{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:#f0ebff;color:#6846d9;font-size:25px;margin-bottom:12px}.chat-side h3{margin:0 0 4px}.chat-side p{font-size:13px;color:#747b86}.context-item{padding:12px;border-radius:12px;background:#f7f7fa;margin-top:10px}.context-item strong{display:block;font-size:13px}.context-item span{font-size:12px;color:#777}.quick-title{font-size:12px;font-weight:700;margin:20px 0 9px;color:#555}.quick-btn{width:100%;border:1px solid #e4e2eb;background:#fff;border-radius:10px;padding:9px;text-align:left;margin-bottom:8px;cursor:pointer;font-family:inherit;font-size:12px}.quick-btn:hover{background:#f7f3ff}.chat-box{min-height:650px;display:flex;flex-direction:column;overflow:hidden}.chat-head{padding:18px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:12px}.status-dot{width:9px;height:9px;border-radius:50%;background:#4caf50}.chat-head strong{display:block}.chat-head small{color:#7c818a}.messages{flex:1;padding:22px;overflow:auto;background:#fbfbfc}.msg{display:flex;margin-bottom:15px}.msg.user{justify-content:flex-end}.bubble{max-width:78%;padding:12px 15px;border-radius:15px;line-height:1.55;font-size:14px;white-space:pre-wrap}.msg.ai .bubble{background:#fff;border:1px solid #e8e8ed;border-top-left-radius:5px}.msg.user .bubble{background:#6846d9;color:#fff;border-top-right-radius:5px}.composer{padding:15px;border-top:1px solid #eee;background:#fff;display:flex;gap:10px}.composer input{flex:1;border:1px solid #dddde5;border-radius:12px;padding:12px 14px;font:inherit;outline:none}.composer input:focus{border-color:#8d72e6}.send-btn{border:0;border-radius:12px;padding:0 20px;background:#6846d9;color:#fff;font-weight:600;cursor:pointer}.clear-btn{border:1px solid #dddde5;background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}.typing{font-size:12px;color:#858a94;margin:0 0 10px 5px}.empty-note{font-size:12px;color:#777;margin-top:15px}@media(max-width:800px){.chat-grid{grid-template-columns:1fr}.chat-side{order:2}.chat-box{min-height:600px}.chat-hero{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script>
+  <header data-site-header></header>
+  <main class="chat-page">
+    <div class="chat-hero"><div><h1>🤖 AI Study Chat</h1><p>Your personalized learning assistant based on your LearnAI progress.</p></div><button class="clear-btn" id="clearChat">Clear Chat</button></div>
+    <div class="chat-grid">
+      <aside class="chat-side">
+        <div class="ai-avatar">✦</div><h3 id="studentName">Learner</h3><p>Personalized learning context</p>
+        <div class="context-item"><strong>Overall quiz progress</strong><span id="overallScore">No quiz yet</span></div>
+        <div class="context-item"><strong>Weak topic</strong><span id="weakTopic">Complete a quiz to detect</span></div>
+        <div class="context-item"><strong>Strong topic</strong><span id="strongTopic">Complete a quiz to detect</span></div>
+        <div class="context-item"><strong>Materials</strong><span id="materialCount">0 uploaded</span></div>
+        <div class="quick-title">Quick questions</div>
+        <button class="quick-btn" data-q="What should I study next?">🎯 What should I study next?</button>
+        <button class="quick-btn" data-q="Explain my weak topic simply.">📚 Explain my weak topic</button>
+        <button class="quick-btn" data-q="How can I improve my quiz score?">📈 How can I improve my score?</button>
+        <button class="quick-btn" data-q="Give me a short revision plan.">📝 Give me a revision plan</button>
+      </aside>
+      <section class="chat-box">
+        <div class="chat-head"><div class="status-dot"></div><div><strong>LearnAI Study Assistant</strong><small>Personalized guidance • Frontend prototype</small></div></div>
+        <div class="messages" id="messages"></div>
+        <div class="composer"><input id="chatInput" placeholder="Ask your learning doubt..." autocomplete="off"><button class="send-btn" id="sendBtn">Send</button></div>
+      </section>
+    </div>
+  </main>
+  <footer data-site-footer></footer>
+  <script src="js/app.js"></script>
+  <script>
+    const HISTORY_KEY='learnai_assessment_history_v1'; const CHAT_KEY='learnai_personal_chat_v1';
+    const $=id=>document.getElementById(id);
+    function history(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]')}catch(e){return[]}}
+    function context(){const h=history(); const topics={}; h.forEach(a=>(a.topicStats||[]).forEach(t=>{if(!topics[t.topic])topics[t.topic]={c:0,t:0};topics[t.topic].c+=t.correct;topics[t.topic].t+=t.total})); const arr=Object.entries(topics).map(([k,v])=>({topic:k,pct:v.t?Math.round(v.c/v.t*100):0})).sort((a,b)=>b.pct-a.pct); return {h,avg:h.length?Math.round(h.reduce((s,x)=>s+Number(x.percentage||0),0)/h.length):null,strong:arr[0],weak:arr[arr.length-1]};}
+    function load(){const c=context(),db=LearnAI.getDB();$('studentName').textContent=db.user?.name||'Learner';$('overallScore').textContent=c.avg===null?'No quiz yet':c.avg+'% average';$('weakTopic').textContent=c.weak?c.weak.topic+' • '+c.weak.pct+'%':'Complete a quiz to detect';$('strongTopic').textContent=c.strong?c.strong.topic+' • '+c.strong.pct+'%':'Complete a quiz to detect';let m=[];try{m=JSON.parse(localStorage.getItem('learnai_uploaded_materials_v2')||'[]')}catch(e){}$('materialCount').textContent=m.length+' uploaded';return c;}
+    function add(role,text){const row=document.createElement('div');row.className='msg '+role;const b=document.createElement('div');b.className='bubble';b.textContent=text;row.appendChild(b);$('messages').appendChild(row);$('messages').scrollTop=$('messages').scrollHeight;}
+    function save(){localStorage.setItem(CHAT_KEY,$('messages').innerHTML)}
+    function response(q){const c=load(),s=q.toLowerCase();const name=LearnAI.getDB().user?.name||'Learner';if(/hello|hi|hey/.test(s))return `Hi ${name}! 👋 I’m your LearnAI Study Assistant. Ask me about your topics, quiz performance, or what to study next.`;if(/next|study next|revision plan/.test(s)){if(c.weak)return `Based on your quiz history, focus first on ${c.weak.topic} (${c.weak.pct}%).\n\nSuggested plan:\n1. Revise the basic concepts.\n2. Review your uploaded material.\n3. Practice 5–10 MCQs.\n4. Retake an assessment and compare your score.`;return 'Complete at least one assessment first. Then I can use your quiz performance to suggest a personalized next step.';}if(/weak|improve|score/.test(s)){if(c.weak)return `${c.weak.topic} is currently your weakest tracked topic at ${c.weak.pct}%.\n\nTo improve: revise the concept, solve a few practice questions, check your mistakes, and retest. Your next goal can be to improve this topic by 10–15 percentage points.`;return 'I need quiz history to personalize this advice. Complete a quiz and I’ll use the result here.';}if(/strong|good/.test(s)){return c.strong?`${c.strong.topic} is your strongest tracked topic at ${c.strong.pct}%. Keep it active with short revision sessions while spending more time on weaker areas.`:'Complete a quiz and I’ll identify your strongest topic.';}if(/quiz|assessment|marks|result/.test(s)){return c.avg===null?'You have no saved quiz result yet. Generate a quiz from your learning material, submit it, and I can use the result for personalized guidance.':`Your current average across saved assessments is ${c.avg}%. I can help you turn that result into a study plan.`;}if(/material|file|document|pdf|ppt/.test(s)){return 'Your uploaded learning materials are connected to the LearnAI learning flow. For this frontend prototype, I can guide you using the saved material/quiz context, while full free-form AI answers from document content would require an AI backend or API.';}return `I can help with your LearnAI study journey. Try asking: “What should I study next?”, “Explain my weak topic simply”, or “How can I improve my quiz score?”`}
+    function send(text){text=(text||$('chatInput').value).trim();if(!text)return;add('user',text);$('chatInput').value='';setTimeout(()=>{add('ai',response(text));save()},280);save()}
+    function restore(){load();const old=localStorage.getItem(CHAT_KEY);if(old){$('messages').innerHTML=old;return}add('ai',`Hi ${LearnAI.getDB().user?.name||'Learner'} 👋\nI’m your personalized study assistant. I can use your saved quiz progress to suggest what to study next, identify weak areas, and help you plan revision.`);}
+    $('sendBtn').onclick=()=>send();$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')send()});document.querySelectorAll('.quick-btn').forEach(b=>b.onclick=()=>send(b.dataset.q));$('clearChat').onclick=()=>{localStorage.removeItem(CHAT_KEY);$('messages').innerHTML='';restore()};restore();
+  </script>
+</body>
+</html>

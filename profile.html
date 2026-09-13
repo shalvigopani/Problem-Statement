@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profile & Registration — LearnAI</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.profile-page{background:#f5f7fb;min-height:100vh}.profile-wrap{max-width:1180px;margin:auto;padding:46px 28px 70px}.profile-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:25px;margin-bottom:28px}.profile-hero h1{margin:0;color:#13243d;font-size:42px}.profile-hero p{margin:10px 0 0;color:#68788d;line-height:1.6}.profile-layout-new{display:grid;grid-template-columns:320px 1fr;gap:22px}.panel-new{background:#fff;border:1px solid #e0e6ef;border-radius:18px;padding:25px;box-shadow:0 7px 22px rgba(22,41,65,.045)}.profile-summary{text-align:center}.big-avatar-new{width:100px;height:100px;border-radius:50%;margin:4px auto 16px;background:linear-gradient(135deg,#1769d3,#6d4de8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800}.profile-summary h2{margin:0;color:#172941}.profile-summary .sub{margin:7px 0 14px;color:#718096}.profile-summary .standard-badge{display:inline-block;background:#edf5ff;color:#1769d3;border-radius:20px;padding:7px 12px;font-size:12px;font-weight:800}.subject-preview{text-align:left;border-top:1px solid #edf0f4;margin-top:22px;padding-top:18px}.subject-preview h3{font-size:14px;margin:0 0 10px;color:#263b56}.subject-chips{display:flex;flex-wrap:wrap;gap:7px}.subject-chips span{background:#f4f6fa;border:1px solid #e5eaf1;color:#5d6d81;border-radius:8px;padding:6px 8px;font-size:11px}.form-title{margin:0;color:#1b2e48;font-size:21px}.form-note{color:#7b8899;font-size:13px;line-height:1.55;margin:6px 0 22px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:17px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:800;color:#40536b}.field input,.field select,.field textarea{width:100%;box-sizing:border-box;border:1px solid #dbe3ec;background:#fff;border-radius:10px;min-height:46px;padding:11px 13px;outline:none;color:#253951;font:inherit}.field textarea{min-height:90px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:#1769d3;box-shadow:0 0 0 3px rgba(23,105,211,.08)}.required{color:#d34b4b}.save-row{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid #edf0f4}.profile-status{margin-top:14px;min-height:20px;font-size:13px}.profile-status.ok{color:#21834c}.profile-status.err{color:#c0392b}.prefs{margin-top:22px}.preference-new{display:flex;justify-content:space-between;gap:15px;padding:14px 0;border-bottom:1px solid #edf0f4}.preference-new:last-child{border-bottom:0}.preference-new b{font-size:13px;color:#263a54}.preference-new p{margin:4px 0 0;font-size:11px;color:#78879a}.switch-new{width:39px;height:24px;border-radius:20px;background:#1769d3;color:#fff;border:0;font-weight:800}
+@media(max-width:850px){.profile-layout-new{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.profile-hero{flex-direction:column;align-items:flex-start}.profile-hero h1{font-size:32px}}
+</style>
+</head>
+<body class="profile-page">
+<header class="site-header" data-site-header></header>
+<main class="profile-wrap">
+  <div class="profile-hero">
+    <div><span class="section-kicker">MY PROFILE & REGISTRATION</span><h1>Create your learning identity.</h1><p>Tell LearnAI who you are and what you study. Your selected standard controls the subjects shown in Learning Hub.</p></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><a id="dashboardLink" class="btn white" href="dashboard.html" style="display:none">Go to Dashboard →</a><button class="btn white" type="button" onclick="LearnAI.logout()">Sign out</button></div>
+  </div>
+  <div class="profile-layout-new">
+    <section class="panel-new profile-summary">
+      <div class="big-avatar-new" id="avatarPreview">L</div>
+      <h2 id="namePreview">Your Name</h2>
+      <p class="sub" id="coursePreview">Student · Complete your profile</p>
+      <span class="standard-badge" id="standardPreview">Standard not selected</span>
+      <div class="subject-preview"><h3>Your Learning Hub subjects</h3><div class="subject-chips" id="subjectPreview"><span>Select a standard</span></div></div>
+      <div class="prefs">
+        <div class="preference-new"><div><b>Personalized recommendations</b><p>Use competency gaps to guide your path.</p></div><button class="switch-new" type="button">✓</button></div>
+        <div class="preference-new"><div><b>AI assessment feedback</b><p>Show strengths and weak areas after quizzes.</p></div><button class="switch-new" type="button">✓</button></div>
+        <div class="preference-new"><div><b>Weekly learning pulse</b><p>Keep progress visible on your dashboard.</p></div><button class="switch-new" type="button">✓</button></div>
+      </div>
+    </section>
+    <section class="panel-new">
+      <h2 class="form-title">Registration details</h2><p class="form-note">Fields marked <span class="required">*</span> are required. You can edit these details anytime.</p>
+      <form id="profileForm">
+        <div class="form-grid">
+          <div class="field"><label>Full name <span class="required">*</span></label><input id="name" required placeholder="Enter your full name"></div>
+          <div class="field"><label>Email address <span class="required">*</span></label><input id="email" type="email" required placeholder="you@example.com"></div>
+          <div class="field"><label>Mobile number</label><input id="mobile" type="tel" inputmode="numeric" placeholder="10-digit mobile number"></div>
+          <div class="field"><label>Date of birth</label><input id="dob" type="date"></div>
+          <div class="field"><label>Gender</label><select id="gender"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select></div>
+          <div class="field"><label>Standard / Stream <span class="required">*</span></label><select id="standard" required><option value="">Select your standard</option><option value="9th">9th</option><option value="10th">10th</option><option value="Commerce">Commerce</option><option value="Science">Science</option><option value="Arts">Arts</option></select></div>
+          <div class="field"><label>City <span class="required">*</span></label><select id="city" required><option value="">Select city</option><option>Rajkot</option><option>Ahmedabad</option><option>Surat</option><option>Vadodara</option><option>Jamnagar</option><option>Other</option></select></div>
+          <div class="field"><label>Institution / School / College</label><input id="institution" placeholder="Enter institution name"></div>
+          <div class="field full"><label>Learning interests</label><textarea id="interests" placeholder="e.g. Mathematics, Python, AI, Data Science"></textarea></div>
+        </div>
+        <div class="save-row"><button class="btn primary" type="submit">Save profile & continue →</button></div>
+        <div class="profile-status" id="status"></div>
+      </form>
+    </section>
+  </div>
+</main>
+<footer class="site-footer" data-site-footer></footer>
+<script src="js/app.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+
+function updateProfileMode(){
+  const logged=LearnAI.isLoggedIn();
+  const title=document.querySelector('.profile-hero h1');
+  const desc=document.querySelector('.profile-hero p');
+  const save=document.querySelector('#profileForm button[type="submit"]');
+  const dashboardLink=document.getElementById('dashboardLink');
+  if(dashboardLink) dashboardLink.style.display=logged?'inline-flex':'none';
+  if(title) title.textContent=logged?'Update your learning identity.':'Create your LearnAI profile.';
+  if(desc) desc.textContent=logged?'Update any profile detail anytime. Your changes will appear across LearnAI.':'Complete your profile to personalize your Learning Hub and continue to your Dashboard.';
+  if(save) save.textContent=logged?'Save changes →':'Save profile & continue →';
+  let sign=document.getElementById('profileSignout');
+  if(logged && !sign){
+    sign=document.createElement('button'); sign.id='profileSignout'; sign.type='button';
+    sign.className='btn light'; sign.textContent='Sign out'; sign.onclick=()=>LearnAI.logout();
+    document.querySelector('.profile-hero').appendChild(sign);
+  }
+  if(!logged && sign) sign.remove();
+}
+
+function fillProfile(){
+  const p=LearnAI.getProfile();
+  ['name','email','mobile','dob','gender','standard','city','institution','interests'].forEach(id=>{if($(id)) $(id).value=p[id]||'';});
+  updatePreview();
+}
+function updatePreview(){
+  const name=$('name').value.trim(), standard=$('standard').value;
+  $('avatarPreview').textContent=(name||'Learner').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join('')||'L';
+  $('namePreview').textContent=name||'Your Name';
+  $('coursePreview').textContent=standard?`Student · ${standard}`:'Student · Complete your profile';
+  $('standardPreview').textContent=standard||'Standard not selected';
+  const subjects=LearnAI.getSubjectsForStandard(standard);
+  $('subjectPreview').innerHTML=subjects.length?subjects.map(x=>`<span>${esc(x)}</span>`).join(''):'<span>Select a standard</span>';
+}
+$('standard').addEventListener('change',updatePreview); $('name').addEventListener('input',updatePreview);
+$('profileForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const data={name:$('name').value.trim(),email:$('email').value.trim(),mobile:$('mobile').value.trim(),dob:$('dob').value,gender:$('gender').value,standard:$('standard').value,city:$('city').value,institution:$('institution').value.trim(),interests:$('interests').value.trim()};
+  if(!data.name||!data.email||!data.standard||!data.city){$('status').className='profile-status err';$('status').textContent='Please complete all required fields.';return;}
+  LearnAI.saveProfile(data);
+  $('status').className='profile-status ok';
+  $('status').textContent='✓ Profile saved successfully. Opening Dashboard...';
+  updatePreview();
+  renderShell();
+  showToast('Profile saved successfully.');
+  window.location.replace('dashboard.html');
+});
+fillProfile();
+updateProfileMode();
+if (LearnAI.isLoggedIn()) {
+  document.querySelector('.profile-hero h1').textContent='Update your learning identity.';
+  document.querySelector('.profile-hero p').textContent='Update any profile detail anytime. Your saved standard controls the subjects shown in Learning Hub.';
+  document.querySelector('.form-title').textContent='Profile details';
+}
+renderShell();
+</script>
+</body></html>

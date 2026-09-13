@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Assessment Results — LearnAI</title><link rel="stylesheet" href="css/style.css"><style>
+.result-actions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}.result-action{border:1px solid #dce4ee;background:#fff;border-radius:12px;padding:15px;text-align:left;cursor:pointer;transition:.18s}.result-action:hover{transform:translateY(-2px);border-color:#1769d3;box-shadow:0 8px 20px rgba(20,55,100,.08)}.result-action b{display:block;color:#17304f;font-size:13px}.result-action span{display:block;color:#738196;font-size:11px;line-height:1.5;margin-top:5px}.weak-topic{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #edf1f5}.weak-topic:last-child{border-bottom:0}.weak-topic strong{font-size:12px;color:#203650}.weak-score{font-size:11px;font-weight:800;color:#c34b4b}.ai-result-note{padding:12px 14px;background:#f4f8ff;border:1px solid #dbe9fb;border-radius:10px;color:#55708f;font-size:11px;line-height:1.6;margin-top:15px}
+@media(max-width:800px){.result-actions-grid{grid-template-columns:1fr}}
+</style></head><body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script><header class="site-header" data-site-header></header>
+<main class="dashboard-main"><div class="result-hero"><span class="section-kicker">ASSESSMENT COMPLETE</span><h1 id="resultTitle">Good work. Here is your result.</h1><div class="result-score"><b id="score">0</b><small id="total">/0</small><span id="percent">0%</span></div><p class="result-label" id="label">Assessment submitted successfully.</p><div class="actions"><a class="btn primary" href="generate.html">Generate another quiz</a><a class="btn light" href="materials.html">My materials</a></div></div>
+<div class="dash-grid two"><section class="panel"><div class="panel-head"><h2>What would you like to do next?</h2></div><div id="nextActions" class="result-actions-grid"></div><div id="aiNote" class="ai-result-note"></div></section>
+<section class="panel feedback"><h2>Assessment summary</h2><h3>Assessment</h3><p id="assessment"></p><h3>Source material</h3><p id="source"></p><h3>Weak areas</h3><div id="weakTopics"></div></section></div>
+<div class="dash-grid two"><section class="panel"><div class="panel-head"><h2>Question review</h2></div><div id="review"></div></section><section class="panel feedback"><h2>Performance</h2><p id="performance"></p><h3>Recommendation</h3><p id="next"></p></section></div></main>
+<script src="js/app.js"></script><script>
+const r=JSON.parse(sessionStorage.getItem("learnai_last_result")||"null");
+const settings=JSON.parse(sessionStorage.getItem("learnai_quiz_settings")||"null");
+if(!r){location.href="materials.html";}else{
+ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+ document.getElementById("score").textContent=r.score;document.getElementById("total").textContent="/"+r.total;document.getElementById("percent").textContent=r.percentage+"%";
+ document.getElementById("resultTitle").textContent=r.assessmentName||"Assessment complete";document.getElementById("assessment").textContent=r.assessmentName||"LearnAI Assessment";document.getElementById("source").textContent=r.file||"Learning material";
+ document.getElementById("label").textContent=r.percentage>=80?"Strong performance · keep building consistency":r.percentage>=60?"Good progress · review and retry":"Keep learning · strengthen the concepts and practice again";
+ document.getElementById("performance").textContent=r.percentage>=80?"You are performing well. Use your incorrect answers to target the remaining gaps.":r.percentage>=60?"You have a useful base. A focused revision + fresh practice quiz should improve consistency.":"Start with the weakest concepts, learn them from the reference material, then retry with a fresh assessment.";
+ const stats={};r.questions.forEach((q,i)=>{const t=q.source||"General";if(!stats[t])stats[t]={correct:0,total:0};stats[t].total++;if(r.answers[i]===q.c)stats[t].correct++});
+ const weak=Object.entries(stats).map(([topic,v])=>({topic,score:Math.round(v.correct/v.total*100),...v})).sort((a,b)=>a.score-b.score);
+ document.getElementById("weakTopics").innerHTML=weak.length?weak.slice(0,4).map(t=>`<div class="weak-topic"><strong>${esc(t.topic)}</strong><span class="weak-score">${t.score}% · ${t.correct}/${t.total}</span></div>`).join(""):"<p>No topic breakdown available.</p>";
+ const weakest=weak[0]?.topic||"your missed concepts";
+ const wrong=r.questions.map((q,i)=>r.answers[i]===q.c?null:q).filter(Boolean);
+ const wrongConcepts=[...new Set(wrong.map(q=>q.source||"General"))].slice(0,5);
+ const retryReq=`Create a fresh practice assessment for my weak areas. Focus on: ${wrongConcepts.join(", ")||weakest}. Make questions similar in skill level to my incorrect questions, but do not repeat the same questions or wording. Use only the uploaded reference material.`;
+ document.getElementById("nextActions").innerHTML=`
+   <button class="result-action" onclick="practiceAgain()"><b>🔄 Practice similar questions</b><span>Generate a fresh quiz for ${esc(weakest)} without repeating this assessment.</span></button>
+   <button class="result-action" onclick="learnTopic()"><b>📖 Learn the weak concept</b><span>Study ${esc(weakest)} using the uploaded reference material.</span></button>
+   <button class="result-action" onclick="reviewMistakes()"><b>💡 Review my mistakes</b><span>Jump to the incorrect questions, correct answers and explanations.</span></button>
+   <button class="result-action" onclick="practiceWeakAreas()"><b>🎯 Practice all weak areas</b><span>Build a focused assessment from the topics you missed.</span></button>`;
+ document.getElementById("aiNote").textContent=`Generation: ${r.generationMode||"Material-grounded"}. Your result is now used to identify weak topics and personalize the next learning action.`;
+ window.practiceAgain=()=>{sessionStorage.setItem("learnai_retry_config",JSON.stringify({name:`Practice — ${weakest}`,focus:"Application",requirements:retryReq}));location.href="generate.html"};
+ window.learnTopic=()=>{location.href="course-detail.html?topic="+encodeURIComponent(weakest)};
+ window.reviewMistakes=()=>{document.getElementById("review").scrollIntoView({behavior:"smooth",block:"start"})};
+ window.practiceWeakAreas=()=>{sessionStorage.setItem("learnai_retry_config",JSON.stringify({name:"Weak Areas Practice",focus:"Key concepts",requirements:`Create a fresh assessment covering these weak areas: ${wrongConcepts.join(", ")||weakest}. Use only the uploaded reference material. Do not repeat previous questions.`}));location.href="generate.html"};
+ document.getElementById("next").textContent=`Start with ${weakest}. Learn the concept, then practice fresh questions until your accuracy improves.`;
+ document.getElementById("review").innerHTML=r.questions.map((q,i)=>{const ok=r.answers[i]===q.c;const selected=r.answers[i]===null?"Not answered":q.a[r.answers[i]];const correct=q.a[q.c];return `<div class="topic-result"><span>Q${i+1}</span><b>${ok?"Correct":"Incorrect"}</b><div style="grid-column:1/3;color:#718095;font-size:10px">${esc(q.q).replace(/\n/g,"<br>")}</div><div style="grid-column:1/3;font-size:11px;margin-top:4px"><strong>Your answer:</strong> ${esc(selected)} · <strong>Correct answer:</strong> ${esc(correct)}</div>${q.explanation?`<div style="grid-column:1/3;color:#718095;font-size:10px;margin-top:3px">${esc(q.explanation)}</div>`:""}</div>`}).join("");
+}
+</script><footer class="site-footer" data-site-footer></footer></body></html>

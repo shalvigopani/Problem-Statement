@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Learning Path — LearnAI</title><link rel="stylesheet" href="css/style.css"></head><body>
+<script>(function(){try{if(localStorage.getItem('learnai_auth_v1')!=='1'){location.replace('profile.html');}}catch(e){location.replace('profile.html');}})();</script>
+<header class="site-header" data-site-header></header><div id="appShell"></div>
+<main class="dashboard-main">
+  <div class="dash-head"><div><span class="section-kicker">MY LEARNING PATH</span><h1>Your learning journey, based on your actual progress.</h1><p>See how much you learned today, what is completed, and what you should focus on next.</p></div><button class="btn light" onclick="renderPath()">↻ Refresh path</button></div>
+  <section class="path-summary" id="pathSummary"></section>
+  <section class="dash-grid two" style="margin-top:16px">
+    <div class="panel"><div class="panel-head"><div><span class="section-kicker">TODAY'S ACTIVITY</span><h3>How much did you work today?</h3></div><span class="status-badge green" id="todayLabel">Live</span></div><div id="timeCard"></div></div>
+    <div class="panel"><div class="panel-head"><div><span class="section-kicker">DAILY GOAL</span><h3>Progress toward your target</h3></div></div><div id="goalCard"></div></div>
+  </section>
+  <section class="panel" style="margin-top:16px"><div class="panel-head"><div><span class="section-kicker">NEXT BEST ACTIONS</span><h3>What you should work on next</h3></div><span class="muted" id="pathReason"></span></div><div class="learning-path" id="dynamicPath"></div></section>
+  <section class="panel" style="margin-top:16px"><div class="panel-head"><div><span class="section-kicker">PROGRESS SNAPSHOT</span><h3>Your learning progress</h3></div></div><div id="progressSnapshot"></div></section>
+</main><footer class="site-footer" data-site-footer></footer>
+<script src="js/app.js"></script>
+<script>
+renderShell();
+function fmtTime(sec){sec=Math.max(0,Math.round(sec));const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);return h?`${h}h ${m}m`:m?`${m}m`:'0m';}
+function getHistory(){try{return JSON.parse(localStorage.getItem('learnai_assessment_history_v1')||'[]')}catch(e){return[]}}
+function getTopicData(history){const map={};history.forEach(a=>(a.topicStats||[]).forEach(t=>{if(!map[t.topic])map[t.topic]={correct:0,total:0};map[t.topic].correct+=Number(t.correct)||0;map[t.topic].total+=Number(t.total)||0;}));return Object.entries(map).map(([topic,v])=>({topic,score:v.total?Math.round(v.correct/v.total*100):0,total:v.total})).sort((a,b)=>a.score-b.score)}
+function renderPath(){
+ const history=getHistory(), today=new Date().toISOString().slice(0,10), seconds=LearnAI.getLearningTime(today), target=2*3600, remaining=Math.max(0,target-seconds), goal=Math.min(100,Math.round(seconds/target*100));
+ const avg=history.length?Math.round(history.reduce((s,a)=>s+(Number(a.percentage)||0),0)/history.length):0;
+ const topics=getTopicData(history), weak=topics[0], strong=topics.length?topics[topics.length-1]:null;
+ document.getElementById('pathSummary').innerHTML=`<div><b>${fmtTime(seconds)}</b><span>worked today</span></div><div><b>${goal}%</b><span>daily goal completed</span></div><div><b>${history.length}</b><span>assessments completed</span></div><div><b>${avg}%</b><span>overall quiz progress</span></div>`;
+ document.getElementById('timeCard').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:end"><div><strong style="font-size:38px">${fmtTime(seconds)}</strong><p class="muted" style="margin:4px 0">Active learning time recorded today</p></div><span style="font-weight:800">Target: 2h</span></div><div class="progress" style="margin-top:18px"><span style="width:${goal}%"></span></div>`;
+ document.getElementById('goalCard').innerHTML=`<div style="text-align:center;padding:8px 0"><strong style="font-size:34px">${goal}%</strong><p class="muted">${remaining?fmtTime(remaining)+' remaining to reach today’s goal':'Daily learning goal reached 🎉'}</p><div class="progress"><span style="width:${goal}%"></span></div></div>`;
+ document.getElementById('pathReason').textContent=weak?`Prioritized from your ${weak.topic} score (${weak.score}%).`:history.length?'Based on your recent assessment results.':'Start a quiz to unlock personalized recommendations.';
+ const actions=[];
+ if(weak) actions.push({title:`Strengthen ${weak.topic}`,priority:'HIGH PRIORITY',time:'30–45 min',desc:`Your current evidence score is ${weak.score}%. Spend your next study session reviewing this topic, then generate a focused quiz.`,href:'generate.html',btn:'Generate quiz'});
+ if(strong) actions.push({title:`Maintain ${strong.topic}`,priority:'MAINTAIN',time:'20–30 min',desc:`You are strongest here at ${strong.score}%. Keep it fresh with a short revision and periodic assessment.`,href:'generate.html',btn:'Practice quiz'});
+ actions.push({title:'Continue your learning materials',priority:'NEXT',time:'30 min',desc:'Use your uploaded materials and Learning Hub resources to build consistent daily learning time.',href:'courses.html',btn:'Open Learning Hub'});
+ document.getElementById('dynamicPath').innerHTML=actions.map((x,i)=>`<div class="path-card ${i===0?'priority-high':i===1?'priority-low':'priority-medium'}"><div class="path-number">0${i+1}</div><div class="path-body"><div class="path-meta"><span class="priority ${i===1?'low':''}">${x.priority}</span><span>${x.time}</span></div><h2>${x.title}</h2><p>${x.desc}</p><div class="actions"><a class="btn ${i===0?'primary':'light'}" href="${x.href}">${x.btn}</a></div></div></div>`).join('');
+ document.getElementById('progressSnapshot').innerHTML=topics.length?topics.slice(0,6).map(t=>`<div style="margin:14px 0"><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800"><span>${t.topic}</span><span>${t.score}%</span></div><div class="progress" style="margin-top:7px"><span style="width:${t.score}%"></span></div></div>`).join(''):`<div class="empty-panel"><h3>No assessment progress yet</h3><p>Complete your first Learning Hub quiz and this path will start adapting to your performance.</p><a class="btn primary" href="courses.html">Start learning</a></div>`;
+}
+renderPath();setInterval(renderPath,60000);
+</script></body></html>
